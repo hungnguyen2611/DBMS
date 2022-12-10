@@ -7,7 +7,7 @@ pip install pandas click
 ## Generate
 - Generator will be create a sql file according sheet name
 ```bash
-python sql_generator.py --generate <filename>.xlsx --outputdir ./
+python sql_generator.py --generate /data/<filename>.xlsx --outputdir ./generated/
 ```
 Ref: [here](https://blog.piinalpin.com/2020/12/sql-generator/)
 ## Build Docker Image for MSSQL
