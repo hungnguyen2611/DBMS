@@ -69,11 +69,9 @@ CREATE CLUSTERED INDEX avg_rating_index ON Book (avg_rating);
 CREATE INDEX IX_title_index ON Book(title);
 CREATE NONCLUSTERED INDEX id_index ON Book (id);
 CREATE INDEX publish_year_index ON Book (publish_year);
+
 ------- Indexing on Author -----
 CREATE INDEX IX_name_index ON Author(name);
-
-
-
 
 
 -------- DROP TABLE ---------------
