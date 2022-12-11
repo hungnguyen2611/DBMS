@@ -58,7 +58,6 @@ async def connect_db(db_host, db_port, db_name, user, password):
         db.connect()
     except:
         raise HTTPException(status_code=503, detail="Can not connect to SQL Server")
-
     return {"message": "Connecting to SQL server successful!"}
 
 
@@ -70,10 +69,14 @@ async def info():
     return db.info()
 
 @app.get("/query/book_rating")
-async def query_book_rating(size: int, low:str, high:str):
+async def query_book_rating(size: int, low:str, high:str, plan:int):
     if db is None:
         return HTTPException(status_code=404, detail="Not found")
     cur = db.connection.cursor()
+    if plan == 1:
+        cur.execute("SET SHOWPLAN_ALL ON")
+    else:
+        cur.execute("SET SHOWPLAN_ALL OFF")
     try:
         cur.execute(f"SELECT TOP {size} * FROM Book WHERE avg_rating BETWEEN {float(low)} AND {float(high)};")
     except:
@@ -86,11 +89,15 @@ async def query_book_rating(size: int, low:str, high:str):
 
 
 @app.get("/query/name")
-async def query_name(table: str, size: int, name: str):
+async def query_name(table: str, size: int, name: str, plan:int):
     if db is None:
         return HTTPException(status_code=404, detail="Not found")
     cur = db.connection.cursor()
     tmp = "name" if table=="Author" else "title"
+    if plan == 1:
+        cur.execute("SET SHOWPLAN_ALL ON")
+    else:
+        cur.execute("SET SHOWPLAN_ALL OFF")
     try:
         cur.execute(f"SELECT TOP {size} * FROM {table} WHERE {tmp} LIKE '{name}%';")
     except:
@@ -100,6 +107,31 @@ async def query_name(table: str, size: int, name: str):
         "_source": data
     }
     return data
+
+
+
+@app.get("/query/published_year")
+async def query_published_year(size: int, year: int, plan:int):
+    if db is None:
+        return HTTPException(status_code=404, detail="Not found")
+    cur = db.connection.cursor()
+    if plan == 1:
+        cur.execute("SET SHOWPLAN_ALL ON")
+    else:
+        cur.execute("SET SHOWPLAN_ALL OFF")
+    try:
+        cur.execute(f"SELECT TOP {size} * FROM Book WHERE published_year={year};")
+    except:
+        raise HTTPException(status_code=501, detail="The database isn't connected")
+    data = cur.fetchall()
+    data = {
+        "_source": data
+    }
+    return data
+
+
+
+
 
 if __name__ == '__main__':
     uvicorn.run(app, host="127.0.0.1", port=8000)
