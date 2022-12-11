@@ -3,9 +3,6 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 
 
-
-
-
 class MSSQL:
     """MS SQL server instance"""
     def __init__(self, db_host:str, db_port:int, db_name:str, user_name:str, password:str) -> None:
