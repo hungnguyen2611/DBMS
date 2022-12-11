@@ -129,7 +129,24 @@ async def query_published_year(size: int, year: int, plan:int):
     }
     return data
 
-
+@app.get("/query/genre")
+async def query_books_belong_to_genre(size: int, genre: str, plan:int):
+    if db is None:
+        return HTTPException(status_code=404, detail="Not found")
+    cur = db.connection.cursor()
+    if plan == 1:
+        cur.execute("SET SHOWPLAN_ALL ON")
+    else:
+        cur.execute("SET SHOWPLAN_ALL OFF")
+    try:
+        cur.execute(f"SELECT TOP {size} title FROM Book b JOIN Book_Genre bg ON b.id=bg.book_id WHERE bg.genre_id =(SELECT id from Genre WHERE name='{genre}');")
+    except:
+        raise HTTPException(status_code=501, detail="The database isn't connected")
+    data = cur.fetchall()
+    data = {
+        "_source": data
+    }
+    return data
 
 
 
