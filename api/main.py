@@ -69,19 +69,37 @@ async def info():
         raise HTTPException(status_code=404, detail="Not found")
     return db.info()
 
-@app.get("/query/")
-async def query_rating(table: str, size: int, low:str, high:str):
+@app.get("/query/book_rating")
+async def query_book_rating(size: int, low:str, high:str):
     if db is None:
         return HTTPException(status_code=404, detail="Not found")
     cur = db.connection.cursor()
     try:
-        cur.execute(f"SELECT TOP {size} * FROM {table} WHERE avg_rating BETWEEN {float(low)} AND {float(high)};")
+        cur.execute(f"SELECT TOP {size} * FROM Book WHERE avg_rating BETWEEN {float(low)} AND {float(high)};")
     except:
         raise HTTPException(status_code=501, detail="The database isn't connected")
     data = cur.fetchall()
+    data = {
+        "_source": data
+    }
     return data
 
 
+@app.get("/query/name")
+async def query_name(table: str, size: int, name: str):
+    if db is None:
+        return HTTPException(status_code=404, detail="Not found")
+    cur = db.connection.cursor()
+    tmp = "name" if table=="Author" else "title"
+    try:
+        cur.execute(f"SELECT TOP {size} * FROM {table} WHERE {tmp} LIKE '{name}%';")
+    except:
+        raise HTTPException(status_code=501, detail="The database isn't connected")
+    data = cur.fetchall()
+    data = {
+        "_source": data
+    }
+    return data
 
 if __name__ == '__main__':
     uvicorn.run(app, host="127.0.0.1", port=8000)
